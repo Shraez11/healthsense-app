@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from utils.db_manager import DatabaseManager
-from utils.auth import init_auth, require_auth, is_authenticated, get_current_user, logout
+from utils.auth import init_auth, require_auth, is_authenticated, get_current_user, logout, show_login_form, show_register_form
 
 # Page configuration
 st.set_page_config(
@@ -19,8 +19,45 @@ init_auth()
 
 # Require authentication
 if not is_authenticated():
-    st.warning("⚠️ Please login to access the dashboard")
-    st.info("👉 Go to the Login page from the sidebar")
+    # Show login page
+    st.markdown("""
+    <style>
+    .login-header {
+        text-align: center;
+        padding: 2rem 0;
+        background: linear-gradient(90deg, #2E86AB, #A23B72);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<h1 class="login-header">🏥 HealthSense</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">AI-Powered Healthcare Management System</p>', unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Login/Register tabs
+    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+
+    with tab1:
+        show_login_form()
+
+    with tab2:
+        show_register_form()
+
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666; padding: 2rem;'>
+        <p><strong>🏥 HealthSense</strong> - Powered by AI for Better Healthcare Management</p>
+        <p style='font-size: 0.9rem;'>Secure • Reliable • HIPAA Compliant</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.stop()
 
 # Initialize database manager
@@ -126,11 +163,11 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📈 Patient Registration Trend")
-    
+
     # Sample data for patient registration trend
     dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='ME')
     patients_monthly = [10, 15, 12, 18, 22, 25, 30, 28, 32, 35, 38, 42]
-    
+
     fig = px.line(
         x=dates, 
         y=patients_monthly,
@@ -142,10 +179,10 @@ with col1:
 
 with col2:
     st.subheader("🏥 Department Distribution")
-    
+
     departments = ['Cardiology', 'Neurology', 'Orthopedics', 'Pediatrics', 'General']
     patient_counts = [25, 18, 22, 15, 30]
-    
+
     fig = px.pie(
         values=patient_counts,
         names=departments,
@@ -177,10 +214,10 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.success("✅ Database: Online")
-    
+
 with col2:
     st.success("✅ AI Services: Active")
-    
+
 with col3:
     st.success("✅ Backup: Updated")
 
