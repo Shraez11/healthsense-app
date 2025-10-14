@@ -1,0 +1,10 @@
+streamlit
+pandas
+numpy
+plotly
+scikit-learn
+sqlalchemy
+psycopg2-binary
+bcrypt
+openai
+reportlab
