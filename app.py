@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from utils.db_manager import DatabaseManager
 from utils.auth import init_auth, require_auth, is_authenticated, get_current_user, logout, show_login_form, show_register_form
+import streamlit.components.v1 as components
 
 # Page configuration
 st.set_page_config(
@@ -30,13 +31,19 @@ if not is_authenticated():
         -webkit-text-fill-color: transparent;
         font-size: 3rem;
         font-weight: bold;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
+    }
+    .sub-desc {
+        text-align:center;
+        font-size:1.05rem;
+        color:#666;
+        margin-bottom:1.5rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown('<h1 class="login-header">🏥 HealthSense</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">AI-Powered Healthcare Management System</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-desc">AI-Powered Healthcare Management System</p>', unsafe_allow_html=True)
 
     st.markdown("---")
 
@@ -70,31 +77,86 @@ data_manager = init_db_manager()
 # Get current user
 current_user = get_current_user()
 
-# Custom CSS for healthcare theme
+# Inject responsive CSS and a techy animated hero
 st.markdown("""
 <style>
-.main-header {
-    text-align: center;
-    padding: 1rem 0;
-    background: linear-gradient(90deg, #2E86AB, #A23B72);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin-bottom: 2rem;
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.hero-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #2E86AB, #A23B72);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+.hero-sub {
+  color:#6b7280;
+  margin-top: 0.25rem;
+}
+
+/* Metric cards grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 .metric-card {
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
-    border-left: 4px solid #2E86AB;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(18, 38, 63, 0.08);
+  border-left: 6px solid rgba(46,134,171,0.12);
+}
+.metric-label { font-size:0.9rem; color:#6b7280; }
+.metric-value { font-size:1.6rem; font-weight:700; margin-top:0.25rem; }
+
+/* Responsive behavior */
+@media (max-width: 1100px) {
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero { grid-template-columns: 1fr; text-align: left; }
+}
+@media (max-width: 600px) {
+  .metrics-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 1.6rem; }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Main header
-st.markdown('<h1 class="main-header">🏥 HealthSense - AI Healthcare Management System</h1>', unsafe_allow_html=True)
+# Hero area with small SVG/graphic to look techy
+st.markdown(f"""
+<div class="hero">
+  <div>
+    <h2 class="hero-title">🏥 HealthSense — AI Healthcare Management</h2>
+    <div class="hero-sub">Smart, responsive, and secure dashboard for clinicians and patients.</div>
+  </div>
+  <div>
+    <!-- Simple SVG graphic; replace or upgrade with your own images -->
+    <svg width="140" height="80" viewBox="0 0 140 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="140" height="80" rx="10" fill="url(#g)"/>
+      <g opacity="0.6">
+        <circle cx="40" cy="40" r="10" fill="white"/>
+        <rect x="60" y="20" width="12" height="40" rx="3" fill="white"/>
+        <rect x="82" y="28" width="36" height="24" rx="4" fill="white"/>
+      </g>
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#2E86AB"/>
+          <stop offset="100%" stop-color="#A23B72"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
@@ -125,36 +187,35 @@ st.sidebar.info("💡 **Quick Tip:** Use the navigation pages above to access di
 # Main dashboard content
 st.header("📊 Dashboard Overview")
 
-# Create columns for metrics
-col1, col2, col3, col4 = st.columns(4)
+# Build HTML metrics grid (responsive)
+today_appointments = len([a for a in data_manager.get_appointments() if a['date'] == datetime.now().strftime("%Y-%m-%d")])
+ai_predictions = 12  # placeholder; replace with real value if available
 
-with col1:
-    st.metric(
-        label="👥 Total Patients",
-        value=patients_count,
-        delta="+5 this month"
-    )
-
-with col2:
-    st.metric(
-        label="📅 Today's Appointments",
-        value=len([a for a in data_manager.get_appointments() if a['date'] == datetime.now().strftime("%Y-%m-%d")]),
-        delta="+2 from yesterday"
-    )
-
-with col3:
-    st.metric(
-        label="💊 Active Prescriptions",
-        value=prescriptions_count,
-        delta="+3 this week"
-    )
-
-with col4:
-    st.metric(
-        label="🤖 AI Predictions",
-        value="12",
-        delta="+4 this week"
-    )
+metrics_html = f"""
+<div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-label">👥 Total Patients</div>
+    <div class="metric-value">{patients_count}</div>
+    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+5 this month</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">📅 Today's Appointments</div>
+    <div class="metric-value">{today_appointments}</div>
+    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+2 from yesterday</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">💊 Active Prescriptions</div>
+    <div class="metric-value">{prescriptions_count}</div>
+    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+3 this week</div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-label">🤖 AI Predictions</div>
+    <div class="metric-value">{ai_predictions}</div>
+    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+4 this week</div>
+  </div>
+</div>
+"""
+components.html(metrics_html, height=200)
 
 st.markdown("---")
 
@@ -175,7 +236,8 @@ with col1:
         labels={'x': 'Month', 'y': 'New Patients'}
     )
     fig.update_traces(line_color='#2E86AB')
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(autosize=True, margin=dict(l=20, r=20, t=50, b=20))
+    st.plotly_chart(fig, use_container_width=True, config={'responsive': True})
 
 with col2:
     st.subheader("🏥 Department Distribution")
@@ -189,7 +251,8 @@ with col2:
         title="Patients by Department"
     )
     fig.update_traces(textposition='inside', textinfo='percent+label')
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(autosize=True, margin=dict(l=20, r=20, t=50, b=20))
+    st.plotly_chart(fig, use_container_width=True, config={'responsive': True})
 
 # Recent activity section
 st.subheader("🔄 Recent Activity")
