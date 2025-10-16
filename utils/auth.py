@@ -203,11 +203,7 @@ def show_login_form():
                 st.rerun()
             else:
                 st.error("❌ Invalid username or password")
-    
-    with st.expander("ℹ️ Demo Credentials"):
-        st.write("**Admin:** username: `admin`, password: `admin123`")
-        st.write("**Doctor:** username: `dr_smith`, password: `doctor123`")
-        st.write("**Patient:** username: `patient1`, password: `patient123`")
+    # Note: Demo credentials expander removed for production privacy.
 
 def show_register_form():
     """Display registration form"""
