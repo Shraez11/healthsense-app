@@ -131,7 +131,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Hero area with small SVG/graphic to look techy
+# Hero area with Lottie animation to look techy
+lottie_url = "https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
+
 st.markdown(f"""
 <div class="hero">
   <div>
@@ -139,21 +141,18 @@ st.markdown(f"""
     <div class="hero-sub">Smart, responsive, and secure dashboard for clinicians and patients.</div>
   </div>
   <div>
-    <!-- Simple SVG graphic; replace or upgrade with your own images -->
-    <svg width="140" height="80" viewBox="0 0 140 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="140" height="80" rx="10" fill="url(#g)"/>
-      <g opacity="0.6">
-        <circle cx="40" cy="40" r="10" fill="white"/>
-        <rect x="60" y="20" width="12" height="40" rx="3" fill="white"/>
-        <rect x="82" y="28" width="36" height="24" rx="4" fill="white"/>
-      </g>
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#2E86AB"/>
-          <stop offset="100%" stop-color="#A23B72"/>
-        </linearGradient>
-      </defs>
-    </svg>
+    <!-- Lottie animation (uses lottie-player webcomponent) -->
+    <div id="lottie-container" style="max-width:140px;">
+      <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+      <lottie-player
+         src="{lottie_url}"
+         background="transparent"
+         speed="1"
+         style="width:140px; height:80px;"
+         loop
+         autoplay>
+      </lottie-player>
+    </div>
   </div>
 </div>
 """, unsafe_allow_html=True)
