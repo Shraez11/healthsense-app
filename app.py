@@ -20,50 +20,243 @@ init_auth()
 
 # Require authentication
 if not is_authenticated():
-    # Show login page
+    # Show enhanced login page with animated left-side panel
     st.markdown("""
     <style>
-    .login-header {
-        text-align: center;
-        padding: 2rem 0;
-        background: linear-gradient(90deg, #2E86AB, #A23B72);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3rem;
-        font-weight: bold;
-        margin-bottom: 1rem;
+    /* Layout helpers */
+    .login-wrapper {
+      display: flex;
+      gap: 1.5rem;
+      align-items: stretch;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
     }
-    .sub-desc {
-        text-align:center;
-        font-size:1.05rem;
-        color:#666;
-        margin-bottom:1.5rem;
+    /* Left panel (animated menu) */
+    .left-panel {
+      width: 100%;
+      max-width: 380px;
+      background: linear-gradient(180deg, rgba(46,134,171,0.08), rgba(162,59,114,0.03));
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(16,24,40,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.45s cubic-bezier(.2,.9,.3,1), box-shadow 0.45s;
+    }
+    .left-panel:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(16,24,40,0.12); }
+
+    .panel-title {
+      font-weight: 800;
+      font-size: 1.15rem;
+      background: linear-gradient(90deg,#2E86AB,#A23B72);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0 0 6px 0;
+    }
+    .panel-sub {
+      color:#6b7280;
+      font-size:0.9rem;
+      margin-bottom: 12px;
+    }
+
+    /* Animated menu (using native details/summary for accessibility) */
+    .menu {
+      width: 100%;
+    }
+    details.menu-section {
+      background: rgba(255,255,255,0.92);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      transition: all 0.35s ease;
+      overflow: hidden;
+      border-left: 4px solid rgba(46,134,171,0.14);
+    }
+    details.menu-section[open] {
+      transform: translateX(4px);
+      border-left-color: rgba(162,59,114,0.24);
+      box-shadow: 0 8px 18px rgba(16,24,40,0.06);
+    }
+    summary.menu-summary {
+      list-style: none;
+      cursor: pointer;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px;
+      font-size: 0.98rem;
+    }
+    summary::-webkit-details-marker { display: none; } /* hide default arrow in some browsers */
+
+    .menu-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(90deg,#ffffff,#f8fafc);
+      box-shadow: 0 4px 12px rgba(16,24,40,0.04);
+      transition: transform 0.35s ease;
+    }
+    details.menu-section[open] .menu-icon { transform: rotate(8deg) scale(1.03); }
+
+    .menu-content {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .dropdown-btn {
+      background: linear-gradient(90deg, rgba(46,134,171,0.06), rgba(162,59,114,0.03));
+      border: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      text-align:left;
+      width:100%;
+      font-weight:600;
+      cursor:pointer;
+      transition: background 0.25s, transform 0.18s;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .dropdown-btn:hover { transform: translateX(6px); background: rgba(46,134,171,0.10); }
+
+    /* micro animation dots */
+    .live-dot {
+      width:10px; height:10px; border-radius:50%;
+      background: #10b981;
+      box-shadow: 0 0 6px rgba(16,185,129,0.6);
+      animation: pulse 1.8s infinite ease-in-out;
+      margin-left:6px;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.45); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 0.9; }
+    }
+
+    /* Lottie container */
+    .lottie-wrap { display:flex; justify-content:center; margin-top:6px; }
+
+    /* Right side (login) tweaks so it looks integrated */
+    .right-panel {
+      flex:1;
+      min-width: 320px;
+      background: transparent;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .login-wrapper { flex-direction: column; }
+      .left-panel { max-width: unset; width:100%; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<h1 class="login-header">🏥 HealthSense</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-desc">AI-Powered Healthcare Management System</p>', unsafe_allow_html=True)
+    # Layout: left animated menu + right login/register area
+    left_col, right_col = st.columns([1, 2])
 
-    st.markdown("---")
+    # LEFT: animated, interactive-looking menu (decorative + some pseudo-buttons)
+    with left_col:
+        left_html = f"""
+        <div class="left-panel" role="region" aria-label="HealthSense quick actions">
+          <div>
+            <div class="panel-title">Welcome to HealthSense</div>
+            <div class="panel-sub">Quick access • Animated UI • Secure</div>
 
-    # Login/Register tabs
-    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+            <div class="menu" aria-hidden="false">
+              <details class="menu-section" open>
+                <summary class="menu-summary">
+                  <div class="menu-icon">🏥</div>
+                  <div>Patient Management</div>
+                  <div class="live-dot" aria-hidden="true"></div>
+                </summary>
+                <div class="menu-content">
+                  <!-- Decorative buttons; in future these can be wired to actions -->
+                  <button class="dropdown-btn">All Patients <span style="opacity:0.7">→</span></button>
+                  <button class="dropdown-btn">Add Patient <span style="opacity:0.7">＋</span></button>
+                  <button class="dropdown-btn">Import CSV <span style="opacity:0.7">⬆</span></button>
+                </div>
+              </details>
 
-    with tab1:
-        show_login_form()
+              <details class="menu-section">
+                <summary class="menu-summary">
+                  <div class="menu-icon">🩺</div>
+                  <div>Medical Records</div>
+                </summary>
+                <div class="menu-content">
+                  <button class="dropdown-btn">View Records</button>
+                  <button class="dropdown-btn">Upload Record</button>
+                  <button class="dropdown-btn">Audit Log</button>
+                </div>
+              </details>
 
-    with tab2:
-        show_register_form()
+              <details class="menu-section">
+                <summary class="menu-summary">
+                  <div class="menu-icon">📅</div>
+                  <div>Appointments</div>
+                </summary>
+                <div class="menu-content">
+                  <button class="dropdown-btn">Today's</button>
+                  <button class="dropdown-btn">Schedule</button>
+                  <button class="dropdown-btn">Reminders</button>
+                </div>
+              </details>
 
-    # Footer
-    st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center; color: #666; padding: 2rem;'>
-        <p><strong>🏥 HealthSense</strong> - Powered by AI for Better Healthcare Management</p>
-        <p style='font-size: 0.9rem;'>Secure • Reliable • HIPAA Compliant</p>
-    </div>
-    """, unsafe_allow_html=True)
+              <details class="menu-section">
+                <summary class="menu-summary">
+                  <div class="menu-icon">⚙️</div>
+                  <div>Settings</div>
+                </summary>
+                <div class="menu-content">
+                  <button class="dropdown-btn">Profile</button>
+                  <button class="dropdown-btn">Security</button>
+                  <button class="dropdown-btn">Integrations</button>
+                </div>
+              </details>
+            </div>
+          </div>
+
+          <div>
+            <div class="lottie-wrap">
+              <!-- Lottie webcomponent: small techy animation -->
+              <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+              <lottie-player
+                src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
+                background="transparent"
+                speed="1"
+                style="width:140px; height:80px;"
+                loop
+                autoplay>
+              </lottie-player>
+            </div>
+            <div style="margin-top:10px; color:#6b7280; font-size:0.85rem; text-align:center;">
+              Secure • Animated • Responsive
+            </div>
+          </div>
+        </div>
+        """
+        components.html(left_html, height=520)
+
+    # RIGHT: keep the functional login/register forms but visually aligned
+    with right_col:
+        st.markdown('<div class="right-panel">', unsafe_allow_html=True)
+        st.markdown('<h1 style="margin-top:0; font-weight:800; font-size:2.4rem; background: linear-gradient(90deg,#2E86AB,#A23B72); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🏥 HealthSense</h1>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#6b7280; margin-top:-10px;">Sign in to access the dashboard</p>', unsafe_allow_html=True)
+        st.markdown("---")
+
+        # Keep tabs for Login/Register
+        tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+        with tab1:
+            show_login_form()
+        with tab2:
+            show_register_form()
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.stop()
 
@@ -77,85 +270,31 @@ data_manager = init_db_manager()
 # Get current user
 current_user = get_current_user()
 
-# Inject responsive CSS and a techy animated hero
+# Custom CSS for healthcare theme (kept for logged-in dashboard)
 st.markdown("""
 <style>
-/* Hero */
-.hero {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-.hero-title {
-  font-size: 2rem;
-  font-weight: 800;
-  background: linear-gradient(90deg, #2E86AB, #A23B72);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
-}
-.hero-sub {
-  color:#6b7280;
-  margin-top: 0.25rem;
-}
-
-/* Metric cards grid */
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
+.main-header {
+    text-align: center;
+    padding: 1rem 0;
+    background: linear-gradient(90deg, #2E86AB, #A23B72);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
 }
 .metric-card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(250,250,250,0.98));
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(18, 38, 63, 0.08);
-  border-left: 6px solid rgba(46,134,171,0.12);
-}
-.metric-label { font-size:0.9rem; color:#6b7280; }
-.metric-value { font-size:1.6rem; font-weight:700; margin-top:0.25rem; }
-
-/* Responsive behavior */
-@media (max-width: 1100px) {
-  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero { grid-template-columns: 1fr; text-align: left; }
-}
-@media (max-width: 600px) {
-  .metrics-grid { grid-template-columns: 1fr; }
-  .hero-title { font-size: 1.6rem; }
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid #2E86AB;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Hero area with Lottie animation to look techy
-lottie_url = "https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
-
-st.markdown(f"""
-<div class="hero">
-  <div>
-    <h2 class="hero-title">🏥 HealthSense — AI Healthcare Management</h2>
-    <div class="hero-sub">Smart, responsive, and secure dashboard for clinicians and patients.</div>
-  </div>
-  <div>
-    <!-- Lottie animation (uses lottie-player webcomponent) -->
-    <div id="lottie-container" style="max-width:140px;">
-      <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-      <lottie-player
-         src="{lottie_url}"
-         background="transparent"
-         speed="1"
-         style="width:140px; height:80px;"
-         loop
-         autoplay>
-      </lottie-player>
-    </div>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+# Main header
+st.markdown('<h1 class="main-header">🏥 HealthSense - AI Healthcare Management System</h1>', unsafe_allow_html=True)
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
@@ -186,35 +325,36 @@ st.sidebar.info("💡 **Quick Tip:** Use the navigation pages above to access di
 # Main dashboard content
 st.header("📊 Dashboard Overview")
 
-# Build HTML metrics grid (responsive)
-today_appointments = len([a for a in data_manager.get_appointments() if a['date'] == datetime.now().strftime("%Y-%m-%d")])
-ai_predictions = 12  # placeholder; replace with real value if available
+# Create columns for metrics
+col1, col2, col3, col4 = st.columns(4)
 
-metrics_html = f"""
-<div class="metrics-grid">
-  <div class="metric-card">
-    <div class="metric-label">👥 Total Patients</div>
-    <div class="metric-value">{patients_count}</div>
-    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+5 this month</div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-label">📅 Today's Appointments</div>
-    <div class="metric-value">{today_appointments}</div>
-    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+2 from yesterday</div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-label">💊 Active Prescriptions</div>
-    <div class="metric-value">{prescriptions_count}</div>
-    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+3 this week</div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-label">🤖 AI Predictions</div>
-    <div class="metric-value">{ai_predictions}</div>
-    <div style="color:#10b981;font-size:0.8rem;margin-top:6px;">+4 this week</div>
-  </div>
-</div>
-"""
-components.html(metrics_html, height=200)
+with col1:
+    st.metric(
+        label="👥 Total Patients",
+        value=patients_count,
+        delta="+5 this month"
+    )
+
+with col2:
+    st.metric(
+        label="📅 Today's Appointments",
+        value=len([a for a in data_manager.get_appointments() if a['date'] == datetime.now().strftime("%Y-%m-%d")]),
+        delta="+2 from yesterday"
+    )
+
+with col3:
+    st.metric(
+        label="💊 Active Prescriptions",
+        value=prescriptions_count,
+        delta="+3 this week"
+    )
+
+with col4:
+    st.metric(
+        label="🤖 AI Predictions",
+        value="12",
+        delta="+4 this week"
+    )
 
 st.markdown("---")
 
@@ -235,8 +375,7 @@ with col1:
         labels={'x': 'Month', 'y': 'New Patients'}
     )
     fig.update_traces(line_color='#2E86AB')
-    fig.update_layout(autosize=True, margin=dict(l=20, r=20, t=50, b=20))
-    st.plotly_chart(fig, use_container_width=True, config={'responsive': True})
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("🏥 Department Distribution")
@@ -250,8 +389,7 @@ with col2:
         title="Patients by Department"
     )
     fig.update_traces(textposition='inside', textinfo='percent+label')
-    fig.update_layout(autosize=True, margin=dict(l=20, r=20, t=50, b=20))
-    st.plotly_chart(fig, use_container_width=True, config={'responsive': True})
+    st.plotly_chart(fig, use_container_width=True)
 
 # Recent activity section
 st.subheader("🔄 Recent Activity")
