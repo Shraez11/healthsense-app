@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 from utils.db_manager import DatabaseManager
 from utils.auth import init_auth, require_auth, is_authenticated, get_current_user, logout, show_login_form, show_register_form
-import streamlit.components.v1 as components
 
 # Page configuration
 st.set_page_config(
@@ -20,62 +19,45 @@ init_auth()
 
 # Require authentication
 if not is_authenticated():
-    # Minimal decorative left panel + original login/register on the right
+    # Show login page
     st.markdown("""
     <style>
-    .login-row { display:flex; gap: 1.5rem; align-items:flex-start; margin-top:8px; }
-    .left-decor {
-      width:100%;
-      max-width:320px;
-      padding:18px;
-      border-radius:12px;
-      background: linear-gradient(180deg, rgba(46,134,171,0.06), rgba(162,59,114,0.03));
-      box-shadow: 0 10px 30px rgba(16,24,40,0.05);
-      text-align:center;
+    .login-header {
+        text-align: center;
+        padding: 2rem 0;
+        background: linear-gradient(90deg, #2E86AB, #A23B72);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 2rem;
     }
-    .left-title { font-weight:800; font-size:1.05rem; margin-bottom:6px;
-      background: linear-gradient(90deg,#2E86AB,#A23B72);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .left-sub { color:#6b7280; font-size:0.9rem; margin-bottom:10px; }
-    @media (max-width:900px) { .login-row { flex-direction:column; } .left-decor { max-width:unset; } }
     </style>
     """, unsafe_allow_html=True)
 
-    col_left, col_right = st.columns([1, 2])
+    st.markdown('<h1 class="login-header">🏥 HealthSense</h1>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">AI-Powered Healthcare Management System</p>', unsafe_allow_html=True)
 
-    with col_left:
-        # Decorative left panel with Lottie only (no interactive dropdowns)
-        left_html = """
-        <div class="left-decor" role="complementary">
-          <div class="left-title">Welcome to HealthSense</div>
-          <div class="left-sub">Smart • Secure • Portable</div>
-          <div style="display:flex;justify-content:center;">
-            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-            <lottie-player
-              src="https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json"
-              background="transparent"
-              speed="1"
-              style="width:180px; height:100px;"
-              loop
-              autoplay>
-            </lottie-player>
-          </div>
-          <div style="color:#6b7280; font-size:0.85rem; margin-top:8px;">Animated preview — purely decorative</div>
-        </div>
-        """
-        components.html(left_html, height=300)
+    st.markdown("---")
 
-    with col_right:
-        # Keep the original login/register layout and logic exactly as before
-        st.markdown('<h1 style="margin-top:0; font-weight:800; font-size:2.4rem; background: linear-gradient(90deg,#2E86AB,#A23B72); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🏥 HealthSense</h1>', unsafe_allow_html=True)
-        st.markdown('<p style="color:#6b7280; margin-top:-10px;">Sign in to access the dashboard</p>', unsafe_allow_html=True)
-        st.markdown("---")
-        tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
-        with tab1:
-            show_login_form()
-        with tab2:
-            show_register_form()
+    # Login/Register tabs
+    tab1, tab2 = st.tabs(["🔐 Login", "📝 Register"])
+
+    with tab1:
+        show_login_form()
+
+    with tab2:
+        show_register_form()
+
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666; padding: 2rem;'>
+        <p><strong>🏥 HealthSense</strong> - Powered by AI for Better Healthcare Management</p>
+        <p style='font-size: 0.9rem;'>Secure • Reliable • HIPAA Compliant</p>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.stop()
 
 # Initialize database manager
